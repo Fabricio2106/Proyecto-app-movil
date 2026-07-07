@@ -1,70 +1,105 @@
-import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCursos } from '../presentation/context/CursosContext';
-import { useCursoForm } from '../presentation/hooks/useCursoForm';
-import { CursoForm } from '../presentation/components/cursos/CursoForm';
-import { CursoItem } from '../presentation/components/cursos/CursoItem';
+import { router } from "expo-router";
+import { useState } from "react";
+import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Curso } from "../domain/entities/Curso";
+import { CursoCard } from "../presentation/components/cursos/CursoCard";
+import { CursoFormModal } from "../presentation/components/cursos/CursoForm";
+import { EmptyState } from "../presentation/components/cursos/EmptyState";
+import { FloatingButton } from "../presentation/components/cursos/FloatingButton";
+import { CursosHeader } from "../presentation/components/cursos/Header";
+import { SearchBar } from "../presentation/components/cursos/SearchBar";
+import { StatsCard } from "../presentation/components/cursos/StatsCard";
+import { useCursos } from "../presentation/context/CursosContext";
+import { useCursoForm } from "../presentation/hooks/useCursoForm";
 
 export default function HomeRoute() {
   const { cursos, eliminar } = useCursos();
   const form = useCursoForm();
 
+  const [busqueda, setBusqueda] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const cursosFiltrados = cursos.filter((c) =>
+    c.nombre.toLowerCase().includes(busqueda.toLowerCase()),
+  );
+
+  const abrirNuevo = () => {
+    form.limpiar();
+    setModalVisible(true);
+  };
+
+  const abrirEditar = (curso: Curso) => {
+    form.comenzarEdicion(curso);
+    setModalVisible(true);
+  };
+
+  const handleGuardar = () => {
+    form.guardar();
+    setModalVisible(false);
+  };
+
+  const handleCancelar = () => {
+    form.limpiar();
+    setModalVisible(false);
+  };
+
+  const confirmarEliminar = (curso: Curso) => {
+    Alert.alert("Eliminar curso", `Eliminar "${curso.nombre}"?`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: () => eliminar(curso.id),
+      },
+    ]);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
-      <View className="flex-1 px-5 pt-4">
+      <View className="flex-row justify-end px-5 pt-2">
+        <TouchableOpacity
+          className="bg-slate-200 px-4 py-2 rounded-xl"
+          onPress={() => router.replace("/login")}
+        >
+          <Text className="text-slate-700 font-bold">Salir</Text>
+        </TouchableOpacity>
+      </View>
 
-        <View className="flex-row justify-between items-center mb-5">
-          <View>
-            <Text className="text-xs font-extrabold tracking-widest text-violet-600">ADMIN</Text>
-            <Text className="text-2xl font-black text-slate-900">Gestion de Cursos</Text>
-          </View>
-          <TouchableOpacity
-            className="bg-slate-200 px-4 py-2 rounded-xl"
-            onPress={() => router.replace('/login')}
-          >
-            <Text className="text-slate-700 font-bold">Salir</Text>
-          </TouchableOpacity>
-        </View>
+      <CursosHeader />
+      <SearchBar value={busqueda} onChangeText={setBusqueda} />
+      <StatsCard total={cursos.length} />
 
-        <CursoForm
-          nombre={form.nombre}
-          descripcion={form.descripcion}
-          editando={form.editandoId !== null}
-          onNombreChange={form.setNombre}
-          onDescripcionChange={form.setDescripcion}
-          onGuardar={form.guardar}
-          onCancelar={form.limpiar}
-        />
-
+      {cursosFiltrados.length === 0 ? (
+        <EmptyState onCrear={abrirNuevo} />
+      ) : (
         <FlatList
-          data={cursos}
+          data={cursosFiltrados}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 24, paddingTop: 16 }}
+          contentContainerStyle={{ paddingBottom: 120, paddingTop: 16 }}
           renderItem={({ item }) => (
-            <CursoItem
+            <CursoCard
               curso={item}
-              onEditar={() => form.comenzarEdicion(item)}
-              onEliminar={() =>
-                Alert.alert('Eliminar curso', `Eliminar "${item.nombre}"?`, [
-                  { text: 'Cancelar', style: 'cancel' },
-                  { text: 'Eliminar', style: 'destructive', onPress: () => eliminar(item.id) },
-                ])
-              }
+              onEditar={() => abrirEditar(item)}
+              onEliminar={() => confirmarEliminar(item)}
             />
           )}
-          ListHeaderComponent={
-            <Text className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">
-              {cursos.length} curso{cursos.length !== 1 ? 's' : ''} registrado{cursos.length !== 1 ? 's' : ''}
-            </Text>
-          }
-          ListEmptyComponent={
-            <Text className="mt-8 text-center text-slate-400">
-              No hay cursos. Crea el primero.
-            </Text>
-          }
         />
-      </View>
+      )}
+
+      {/* Ahora SÍ va al final, después del FlatList */}
+      <FloatingButton onPress={abrirNuevo} />
+
+      <CursoFormModal
+        visible={modalVisible}
+        onClose={handleCancelar}
+        nombre={form.nombre}
+        setNombre={form.setNombre}
+        descripcion={form.descripcion}
+        setDescripcion={form.setDescripcion}
+        onGuardar={handleGuardar}
+        esEdicion={form.editandoId !== null}
+      />
     </SafeAreaView>
   );
 }

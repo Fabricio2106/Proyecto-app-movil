@@ -1,47 +1,85 @@
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
 
-interface CursoFormProps {
+interface Props {
+  visible: boolean;
+  onClose: () => void;
   nombre: string;
+  setNombre: (v: string) => void;
   descripcion: string;
-  editando: boolean;
-  onNombreChange: (valor: string) => void;
-  onDescripcionChange: (valor: string) => void;
+  setDescripcion: (v: string) => void;
+  errors?: { nombre?: string; descripcion?: string };
   onGuardar: () => void;
-  onCancelar: () => void;
+  esEdicion?: boolean;
 }
 
-export function CursoForm(props: CursoFormProps) {
+export const CursoFormModal = ({
+  visible,
+  onClose,
+  nombre,
+  setNombre,
+  descripcion,
+  setDescripcion,
+  errors,
+  onGuardar,
+  esEdicion,
+}: Props) => {
   return (
-    <View className="rounded-2xl bg-white p-4 shadow border border-slate-100">
-      <TextInput
-        className="mb-3 rounded-xl border border-slate-300 px-4 py-3 text-slate-800"
-        placeholder="Nombre del curso"
-        placeholderTextColor="#94a3b8"
-        value={props.nombre}
-        onChangeText={props.onNombreChange}
-      />
-      <TextInput
-        className="mb-3 rounded-xl border border-slate-300 px-4 py-3 text-slate-800"
-        placeholder="Descripcion del curso"
-        placeholderTextColor="#94a3b8"
-        value={props.descripcion}
-        onChangeText={props.onDescripcionChange}
-        multiline
-        numberOfLines={2}
-      />
-      <TouchableOpacity
-        className="items-center rounded-xl bg-violet-600 p-4"
-        onPress={props.onGuardar}
-      >
-        <Text className="font-extrabold text-white">
-          {props.editando ? 'Actualizar curso' : 'Crear curso'}
-        </Text>
-      </TouchableOpacity>
-      {props.editando && (
-        <TouchableOpacity className="items-center p-3" onPress={props.onCancelar}>
-          <Text className="font-bold text-slate-500">Cancelar edicion</Text>
-        </TouchableOpacity>
-      )}
-    </View>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
+      <View className="flex-1 bg-black/40 justify-end">
+        <View className="bg-white rounded-t-3xl p-6">
+          <Text className="text-xl font-extrabold text-slate-800 mb-4">
+            {esEdicion ? "Editar Curso" : "Nuevo Curso"}
+          </Text>
+
+          <Text className="text-slate-600 mb-1 font-medium">Nombre</Text>
+          <TextInput
+            value={nombre}
+            onChangeText={setNombre}
+            placeholder="Ej. Desarrollo App Móvil"
+            className="bg-slate-100 rounded-2xl px-4 py-3 text-slate-800 mb-1"
+          />
+          {errors?.nombre && (
+            <Text className="text-red-500 text-xs mb-2">{errors.nombre}</Text>
+          )}
+
+          <Text className="text-slate-600 mb-1 font-medium mt-3">
+            Descripción
+          </Text>
+          <TextInput
+            value={descripcion}
+            onChangeText={setDescripcion}
+            placeholder="Describe brevemente el curso"
+            multiline
+            numberOfLines={3}
+            className="bg-slate-100 rounded-2xl px-4 py-3 text-slate-800 mb-1"
+          />
+          {errors?.descripcion && (
+            <Text className="text-red-500 text-xs mb-2">
+              {errors.descripcion}
+            </Text>
+          )}
+
+          <View className="flex-row gap-3 mt-5">
+            <TouchableOpacity
+              onPress={onClose}
+              className="flex-1 py-3 rounded-2xl bg-slate-100 items-center"
+            >
+              <Text className="text-slate-600 font-semibold">Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={onGuardar}
+              className="flex-1 py-3 rounded-2xl bg-violet-600 items-center"
+            >
+              <Text className="text-white font-semibold">Guardar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
-}
+};

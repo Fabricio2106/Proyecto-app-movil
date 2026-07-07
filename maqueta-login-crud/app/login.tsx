@@ -1,29 +1,34 @@
+import { router } from "expo-router";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
+  Image,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import { router } from 'expo-router';
-import { useLoginForm } from '../presentation/hooks/useLoginForm';
-import { CustomTextInput } from '../presentation/components/shared/CustomTextInput';
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { CustomTextInput } from "../presentation/components/shared/CustomTextInput";
+import { useLoginForm } from "../presentation/hooks/useLoginForm";
 
 export default function LoginRoute() {
-  const { email, setEmail, password, setPassword, errors, handleLogin } = useLoginForm();
+  const { email, setEmail, password, setPassword, errors, handleLogin } =
+    useLoginForm();
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-blue-600"
     >
       <ScrollView contentContainerClassName="flex-grow">
-
         {/* Header azul */}
         <View className="items-center pt-20 pb-12 px-6">
-          <View className="w-16 h-16 rounded-2xl bg-white items-center justify-center mb-6">
-            <Text className="text-blue-600 text-2xl font-black">ID</Text>
+          <View className="w-20 h-20 rounded-2xl bg-white items-center justify-center mb-6">
+            <Image
+              source={require("../assets/images/logo-idat.png")}
+              className="w-20 h-20"
+              resizeMode="contain"
+            />
           </View>
           <Text className="text-4xl font-black text-white tracking-tight">
             Bienvenido
@@ -35,7 +40,6 @@ export default function LoginRoute() {
 
         {/* Card blanca */}
         <View className="flex-1 bg-white rounded-t-[36px] px-6 pt-8 pb-12">
-
           <View className="flex-row justify-center mb-8">
             <View className="bg-blue-50 border border-blue-100 rounded-full px-4 py-1">
               <Text className="text-blue-500 text-xs font-semibold tracking-widest uppercase">
@@ -68,7 +72,9 @@ export default function LoginRoute() {
             className="bg-blue-600 rounded-2xl h-14 mt-4 items-center justify-center active:bg-blue-700"
             onPress={handleLogin}
           >
-            <Text className="text-white font-bold text-lg tracking-wide">Ingresar</Text>
+            <Text className="text-white font-bold text-lg tracking-wide">
+              Ingresar
+            </Text>
           </TouchableOpacity>
 
           <View className="flex-row items-center my-6">
@@ -93,14 +99,13 @@ export default function LoginRoute() {
 
           <TouchableOpacity
             className="p-2"
-            onPress={() => router.push('/registro')}
+            onPress={() => router.push("/registro")}
           >
             <Text className="text-center text-slate-400 text-base">
-              No tienes cuenta?{' '}
+              No tienes cuenta?{" "}
               <Text className="text-blue-600 font-bold">Registrate</Text>
             </Text>
           </TouchableOpacity>
-
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
